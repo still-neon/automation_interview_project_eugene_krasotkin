@@ -1,19 +1,18 @@
 package pageobjects;
 
+import base.BasePage;
 import lombok.Getter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import util.CustomSleeper;
 
 import java.util.Map;
 
 
-public class HomePageSearchForm {
+public class HomePageSearchForm extends BasePage{
 	private static final String URL = "https://www.priceline.com/";
 	@FindBy(id = "search-tab-flights")
 	private static WebElement flightsTab;
@@ -36,13 +35,9 @@ public class HomePageSearchForm {
 	@FindBy(xpath = "//button[@data-autobot-element-id='HOME_FLIGHTS_SUBMIT_BUTTON']")
 	private WebElement searchButton;
 
-	private WebDriver driver;
-	private WebDriverWait wait;
-
 
 	public HomePageSearchForm(WebDriver driver) {
-		this.driver = driver;
-		wait = new WebDriverWait(driver, 10);
+		super(driver);
 		PageFactory.initElements(driver, this);
 	}
 
@@ -63,14 +58,16 @@ public class HomePageSearchForm {
 
 	public void enterDeparting(String departing) {
 		departureInput.sendKeys(departing);
-		CustomSleeper.sleepTight(500);
-		waitAndClick(departureInput.findElement(By.xpath(String.format("//div[contains(text(),'%s')]", departing))));
+		CustomSleeper.sleepTight(1000);
+		WebElement departingPlace = departureInput.findElement(By.xpath(String.format("//div[contains(text(),'%s')]", departing)));
+		waitAndClick(departingPlace);
 	}
 
 	public void enterArrival(String arrival) {
 		arrivalInput.sendKeys(arrival);
-		CustomSleeper.sleepTight(500);
-		waitAndClick(departureInput.findElement(By.xpath(String.format("//div[contains(text(),'%s')]", arrival))));
+		CustomSleeper.sleepTight(1000);
+		WebElement arrivalPlace = arrivalInput.findElement(By.xpath(String.format("//div[contains(text(),'%s')]", arrival)));
+		waitAndClick(arrivalPlace);
 	}
 
 	public void enterDates(String departureDate, String arrivalDate) {
@@ -107,11 +104,6 @@ public class HomePageSearchForm {
 		for(int i = 1; i < number; i++) {
 			waitAndClick(groupPlusButton);
 		}
-	}
-
-	private void waitAndClick(WebElement element) {
-		wait.until(ExpectedConditions.elementToBeClickable(element));
-		element.click();
 	}
 
 	@Getter
