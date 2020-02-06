@@ -46,13 +46,8 @@ public class FlightDetailsPage extends BasePage {
 	}
 
 	public void waitForPageLoaded() {
-		Set<String> windowHandlers = driver.getWindowHandles();
-		for (String windowHandler : windowHandlers) {
-			driver.switchTo().window(windowHandler);
-			if (driver.getPageSource().contains("Departure Information")) {
-				break;
-			}
-		}
+		switchToCurrentTab("Departure Information");
+
 		waitForVisibility(continueButton);
 	}
 

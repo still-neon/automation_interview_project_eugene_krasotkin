@@ -55,10 +55,10 @@ public class FlightSearcher {
 	@Test
 	public void search() {
 		openFlightsTab();
-		enterFlightData();
+		enterFlightData(ROUND_TRIP,DEPARTING,ARRIVAL,START_DATE, END_DATE,TRAVELERS_GROUPS,PREMIUM_ECONOMY);
 		pressSearch();
-		filterTheResults();
-		processTheResults();
+		filterTheResults(STOPS, AIRLINES);
+		processTheResults(TRAVELERS_GROUPS);
 	}
 
 	@Step("1. Click on the Flights tab")
@@ -71,13 +71,13 @@ public class FlightSearcher {
 			"3. Enter departing, arrival, dates" +
 			"4. Select travelers" +
 			"5. Select cabin class")
-	private void enterFlightData() {
-		homePageSearchForm.selectDestinationSettings(ROUND_TRIP);
-		homePageSearchForm.enterDeparting(DEPARTING);
-		homePageSearchForm.enterArrival(ARRIVAL);
-		homePageSearchForm.enterDates(START_DATE, END_DATE);
-		homePageSearchForm.selectTravelers(TRAVELERS_GROUPS);
-		homePageSearchForm.selectCabinClass(PREMIUM_ECONOMY);
+	private void enterFlightData(DestinationSettings destinationSettings, String departing, String arrival, String startDate, String endDate, Map<TravelersGroup, Integer> travelersGroups, CabinClasses cabinClasses) {
+		homePageSearchForm.selectDestinationSettings(destinationSettings);
+		homePageSearchForm.enterDeparting(departing);
+		homePageSearchForm.enterArrival(arrival);
+		homePageSearchForm.enterDates(startDate, endDate);
+		homePageSearchForm.selectTravelers(travelersGroups);
+		homePageSearchForm.selectCabinClass(cabinClasses);
 	}
 
 	@Step("6. Press Search button")
@@ -87,17 +87,17 @@ public class FlightSearcher {
 
 	@Step("7. Wait results loading" +
 			"8. Filter results")
-	private void filterTheResults() {
+	private void filterTheResults(Set<SearchResultsPage.Stops> stops, Set<SearchResultsPage.Airlines> airlines) {
 		searchResultsPage.waitForResultsLoading();
-		searchResultsPage.selectStops(STOPS);
-		searchResultsPage.selectAirlines(AIRLINES);
+		searchResultsPage.selectStops(stops);
+		searchResultsPage.selectAirlines(airlines);
 	}
 
 	@Step("9. Print and save result")
-	private void processTheResults() {
+	private void processTheResults(Map<TravelersGroup, Integer> travelersGroups) {
 		searchResultsPage.findMostExpensive();
 		flightDetailsPage.waitForPageLoaded();
-		flightDetailsPage.printFlightInfo(TRAVELERS_GROUPS);
+		flightDetailsPage.printFlightInfo(travelersGroups);
 		flightDetailsPage.makePageScreenshot();
 	}
 }

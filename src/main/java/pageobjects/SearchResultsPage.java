@@ -1,11 +1,9 @@
 package pageobjects;
 
 import base.BasePage;
-import lombok.Getter;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import util.CustomSleeper;
 
 import java.util.Set;
 
@@ -30,63 +28,44 @@ public class SearchResultsPage extends BasePage {
 	public void selectStops(Set<Stops> stops) {
 		stopsNoneButton.click();
 		for (Stops stop : stops) {
-			WebElement stopPlace = stopsNoneButton.findElement(By.xpath(String.format("//parent::div//parent::div//parent::div//span[text()='%s']//parent::*//preceding-sibling::div//div", stop.getStop())));
-			waitAndClick(stopPlace);
+			waitAndClick(stopsNoneButton.findElement(stop.getCheckBox()));;
 		}
 	}
 
 	public void selectAirlines(Set<Airlines> airlines) {
 		airlinesNoneButton.click();
 		for (Airlines airline : airlines) {
-			WebElement airlineName = stopsNoneButton.findElement(By.xpath(String.format("//parent::div//parent::div//parent::div//span[text()='%s']//parent::*//preceding-sibling::div//div", airline.getAirline())));
-			waitAndClick(airlineName);
+			waitAndClick(airlinesNoneButton.findElement(airline.getCheckBox()));
 
 		}
 	}
 
 	public void waitForResultsLoading() {
-		Set<String> windowHandlers = driver.getWindowHandles();
-		for (String windowHandler : windowHandlers) {
-			driver.switchTo().window(windowHandler);
-			if (driver.getPageSource().contains("Fewer Options")) {
+		switchToCurrentTab("Fewer Options");
 
-				break;
-			}
-		}
 		waitForVisibility(stopsNoneButton);
 		waitForVisibility(airlinesNoneButton);
 	}
 
 	public void findMostExpensive() {
 		String flightLocator = "//span[contains(text(),'View More Flights')]";
-		CustomSleeper.sleepTight(2000);
+
 		while (isElementOnPage(flightLocator)) {
 			waitForVisibility(stopsNoneButton);
 			driver.findElement(By.xpath(flightLocator)).click();
-			CustomSleeper.sleepTight(2000);
 		}
+
 		String flightChooseButtonLocator = "//li[last()]/span/li//button[normalize-space()='Choose']";
 
 		JavascriptExecutor jse = (JavascriptExecutor) driver;
 		jse.executeScript("window.scrollTo(0, document.body.scrollHeight)");
 
-		CustomSleeper.sleepTight(2000);
 		if (isElementOnPage(flightChooseButtonLocator)) {
 			WebElement mostExpensiveChooseButton = searchResultsList.findElement(By.xpath(flightChooseButtonLocator));
 			waitAndClick(mostExpensiveChooseButton);
 		}
 	}
 
-	private boolean isElementOnPage(String locator) {
-		try {
-			driver.findElement(By.xpath(locator));
-			return true;
-		} catch (NoSuchElementException e) {
-			return false;
-		}
-	}
-
-	@Getter
 	public enum Stops {
 		NONSTOP("nonstop"), UP_TO_1_STOP("up to 1 stop");
 
@@ -95,9 +74,12 @@ public class SearchResultsPage extends BasePage {
 		Stops(String stop) {
 			this.stop = stop;
 		}
+
+		public By getCheckBox(){
+			return  By.xpath(String.format(".//parent::div//parent::div//parent::div//span[text()='%s']//parent::*//preceding-sibling::div//div", stop));
+		}
 	}
 
-	@Getter
 	public enum Airlines {
 		DELTA_AIR_LINES("Delta Air Lines");
 
@@ -105,6 +87,10 @@ public class SearchResultsPage extends BasePage {
 
 		Airlines(String airline) {
 			this.airline = airline;
+		}
+
+		public By getCheckBox(){
+			return  By.xpath(String.format(".//parent::div//parent::div//parent::div//span[text()='%s']//parent::*//preceding-sibling::div//div", airline));
 		}
 	}
 }

@@ -7,7 +7,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import util.CustomSleeper;
 
 import java.util.Map;
 
@@ -57,27 +56,21 @@ public class HomePageSearchForm extends BasePage {
 	}
 
 	public void enterDeparting(String departing) {
-		departureInput.sendKeys(departing);
-		CustomSleeper.sleepTight(1000);
-		WebElement departingPlace = departureInput.findElement(By.xpath(String.format("//div[contains(text(),'%s')]", departing)));
-		waitAndClick(departingPlace);
+		typeAndSelect(departureInput, departing);
 	}
 
 	public void enterArrival(String arrival) {
-		arrivalInput.sendKeys(arrival);
-		CustomSleeper.sleepTight(1000);
-		WebElement arrivalPlace = arrivalInput.findElement(By.xpath(String.format("//div[contains(text(),'%s')]", arrival)));
-		waitAndClick(arrivalPlace);
+		typeAndSelect(arrivalInput,arrival);
 	}
 
 	public void enterDates(String departureDate, String arrivalDate) {
 		waitAndClick(dateInput);
+		waitAndClick(getStartDate(departureDate));
+		waitAndClick(getStartDate(arrivalDate));
+	}
 
-		WebElement departure = calendarCard.findElement(By.xpath(String.format("//div[@aria-label='%s']", departureDate)));
-		WebElement arrival = calendarCard.findElement(By.xpath(String.format("//div[@aria-label='%s']", arrivalDate)));
-
-		waitAndClick(departure);
-		waitAndClick(arrival);
+	private WebElement getStartDate(String date) {
+		return calendarCard.findElement(By.xpath(String.format(".//div[@aria-label='%s']", date)));
 	}
 
 	public void selectTravelers(Map<TravelersGroup, Integer> travelersGroupsInfo) {
@@ -96,6 +89,14 @@ public class HomePageSearchForm extends BasePage {
 
 	public void pressSearchButton() {
 		waitAndClick(searchButton);
+	}
+
+	private void typeAndSelect(WebElement dropDownElement, String text) {
+		dropDownElement.sendKeys(text);
+		By searchableValue = By.xpath(String.format("//div[contains(text(),'%s')]", text));
+		waitForElementPresent(searchableValue);
+		WebElement elementForSelection = driver.findElement(searchableValue);
+		waitAndClick(elementForSelection);
 	}
 
 	private void selectTraveler(TravelersGroup travelersGroup, int number) {
