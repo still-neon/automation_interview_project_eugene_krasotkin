@@ -4,3 +4,4 @@ allure-results
 allure-report
 target
 *.iml
+*.png

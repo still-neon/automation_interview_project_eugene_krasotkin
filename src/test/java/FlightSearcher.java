@@ -1,17 +1,13 @@
 import io.qameta.allure.Step;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.testng.annotations.*;
+import pageobjects.FlightDetailsPage;
 import pageobjects.HomePageSearchForm;
 import pageobjects.SearchResultsPage;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static pageobjects.HomePageSearchForm.*;
 import static pageobjects.HomePageSearchForm.CabinClasses.*;
@@ -22,9 +18,22 @@ import static pageobjects.SearchResultsPage.Airlines.*;
 import static pageobjects.SearchResultsPage.Stops.*;
 
 public class FlightSearcher {
+	private static final String DEPARTING = "San Francisco, CA (SFO)";
+	private static final String ARRIVAL = "New York City, NY (NYC)";
+	private static final String START_DATE = "April 20, 2020";
+	private static final String END_DATE = "April 25, 2020";
+	private static final Set<SearchResultsPage.Stops> STOPS = new HashSet<SearchResultsPage.Stops>(Arrays.asList(NONSTOP, UP_TO_1_STOP));
+	private static final Set<SearchResultsPage.Airlines> AIRLINES = new HashSet<SearchResultsPage.Airlines>(Arrays.asList(DELTA_AIR_LINES));
+	private static final Map<TravelersGroup, Integer> TRAVELERS_GROUPS;
+	static {
+		TRAVELERS_GROUPS = new HashMap<TravelersGroup, Integer>();
+		TRAVELERS_GROUPS.put(ADULTS, 2);
+	}
 	private WebDriver driver;
 	private HomePageSearchForm homePageSearchForm;
 	private SearchResultsPage searchResultsPage;
+	private FlightDetailsPage flightDetailsPage;
+
 
 	@BeforeMethod
 	public void setUp() {
@@ -32,13 +41,10 @@ public class FlightSearcher {
 		System.setProperty("webdriver.gecko.driver", "src\\main\\resources\\geckodriver.exe");
 		options.addArguments("start-maximized");
 		driver = new FirefoxDriver(options);
-//		ChromeOptions options = new ChromeOptions();
-//		System.setProperty("webdriver.chrome.driver", "src\\main\\resources\\chromedriver.exe");
-//		options.addArguments("start-maximized");
-//		driver = new ChromeDriver(options);
 
 		homePageSearchForm = new HomePageSearchForm(driver);
 		searchResultsPage = new SearchResultsPage(driver);
+		flightDetailsPage = new FlightDetailsPage(driver);
 	}
 
 	@AfterMethod
@@ -66,13 +72,11 @@ public class FlightSearcher {
 			"4. Select travelers" +
 			"5. Select cabin class")
 	private void enterFlightData() {
-		Map<TravelersGroup, Integer> map = new HashMap<TravelersGroup, Integer>();
-		map.put(ADULTS, 2);
 		homePageSearchForm.selectDestinationSettings(ROUND_TRIP);
-		homePageSearchForm.enterDeparting("San Francisco, CA (SFO)");
-		homePageSearchForm.enterArrival("New York City, NY");
-		homePageSearchForm.enterDates("April 20, 2020", "April 25, 2020");
-		homePageSearchForm.selectTravelers(map);
+		homePageSearchForm.enterDeparting(DEPARTING);
+		homePageSearchForm.enterArrival(ARRIVAL);
+		homePageSearchForm.enterDates(START_DATE, END_DATE);
+		homePageSearchForm.selectTravelers(TRAVELERS_GROUPS);
 		homePageSearchForm.selectCabinClass(PREMIUM_ECONOMY);
 	}
 
@@ -84,27 +88,16 @@ public class FlightSearcher {
 	@Step("7. Wait results loading" +
 			"8. Filter results")
 	private void filterTheResults() {
-		Set<String> windowHandlers = driver.getWindowHandles();
-		for (String windowHandler : windowHandlers) {
-			driver.switchTo().window(windowHandler);
-			if (driver.getCurrentUrl().contains("www.priceline.com/m/fly/search")) {
-
-				break;
-			}
-		}
-		Set<SearchResultsPage.Stops> stops = new HashSet<SearchResultsPage.Stops>();
-		stops.add(NONSTOP);
-		stops.add(UP_TO_1_STOP);
-		Set<SearchResultsPage.Airlines> airlines = new HashSet<SearchResultsPage.Airlines>();
-		airlines.add(DELTA_AIR_LINES);
-		//searchResultsPage.wait()
-		searchResultsPage.selectStops(stops);
-		searchResultsPage.selectAirlines(airlines);
-
+		searchResultsPage.waitForResultsLoading();
+		searchResultsPage.selectStops(STOPS);
+		searchResultsPage.selectAirlines(AIRLINES);
 	}
 
 	@Step("9. Print and save result")
 	private void processTheResults() {
-
+		searchResultsPage.findMostExpensive();
+		flightDetailsPage.waitForPageLoaded();
+		flightDetailsPage.printFlightInfo(TRAVELERS_GROUPS);
+		flightDetailsPage.makePageScreenshot();
 	}
 }

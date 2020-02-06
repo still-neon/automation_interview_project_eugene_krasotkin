@@ -12,7 +12,7 @@ import util.CustomSleeper;
 import java.util.Map;
 
 
-public class HomePageSearchForm extends BasePage{
+public class HomePageSearchForm extends BasePage {
 	private static final String URL = "https://www.priceline.com/";
 	@FindBy(id = "search-tab-flights")
 	private static WebElement flightsTab;
@@ -82,7 +82,7 @@ public class HomePageSearchForm extends BasePage{
 
 	public void selectTravelers(Map<TravelersGroup, Integer> travelersGroupsInfo) {
 		waitAndClick(travelerSelectionButton);
-		for(Map.Entry<TravelersGroup, Integer> travelersGroupInfo : travelersGroupsInfo.entrySet()) {
+		for (Map.Entry<TravelersGroup, Integer> travelersGroupInfo : travelersGroupsInfo.entrySet()) {
 			selectTraveler(travelersGroupInfo.getKey(), travelersGroupInfo.getValue());
 		}
 		waitAndClick(travelerSelectionDoneButton);
@@ -99,9 +99,9 @@ public class HomePageSearchForm extends BasePage{
 	}
 
 	private void selectTraveler(TravelersGroup travelersGroup, int number) {
-		WebElement groupPlusButton = travelerSelectionButton.findElement(By.xpath(String.format("//span[contains(text(),'%s')]//parent::div//button[contains(@id,'plus-button')]", travelersGroup.getGroup())));
+		WebElement groupPlusButton = travelerSelectionButton.findElement(By.xpath(String.format("//span[text()='%s']//parent::div//button[contains(@id,'plus-button')]", travelersGroup.getGroup())));
 
-		for(int i = 1; i < number; i++) {
+		for (int i = 1; i < number; i++) {
 			waitAndClick(groupPlusButton);
 		}
 	}
